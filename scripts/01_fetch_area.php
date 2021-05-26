@@ -124,5 +124,9 @@ foreach ($diseases as $code => $disease) {
             $result[$city][$area['code']] = $area['value'];
         }
     }
+    ksort($result);
+    foreach($result AS $k1 => $v1) {
+        ksort($result[$k1]);
+    }
     file_put_contents($dataPath . '/' . $code . '.json', json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
 }
