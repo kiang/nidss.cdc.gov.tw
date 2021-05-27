@@ -116,6 +116,7 @@ if(!file_exists($dataPath)) {
     mkdir($dataPath, 0777, true);
 }
 
+$total = 0;
 foreach ($diseases as $code => $disease) {
     $params['pty_disease'] = $code;
     $result = [];
@@ -126,11 +127,22 @@ foreach ($diseases as $code => $disease) {
         $areas = json_decode($areas, true);
         foreach($areas AS $area) {
             $result[$city][$area['code']] = $area['value'];
+            $total += $area['value'];
         }
     }
     ksort($result);
     foreach($result AS $k1 => $v1) {
         ksort($result[$k1]);
     }
-    file_put_contents($dataPath . '/' . $code . '.json', json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    $targetFile = $dataPath . '/' . $code . '.json';
+    $json = json_decode(file_get_contents($targetFile), true);
+    if(!isset($json['data']) || $json['data'] !== $result) {
+        file_put_contents($targetFile, json_encode([
+            'meta' => [
+                'total' => $total,
+                'modified' => date('Y-m-d H:i:s'),
+            ],
+            'data' => $result,
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    }
 }
